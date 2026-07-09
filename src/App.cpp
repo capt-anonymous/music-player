@@ -14,7 +14,6 @@ void App::begin() {
     
     // Initialize Stamps3 board, keyboard matrix, and core hardware interfaces
     M5Cardputer.begin(cfg, true);
-    M5Cardputer.Speaker.end(); // Double safeguard to release I2S line resources
     
     // Set up screen canvas buffer
     _displayManager.begin();
