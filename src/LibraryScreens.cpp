@@ -497,6 +497,6 @@ void SongsScreen::handleKey(const KeyInput& key) {
         _manager->popScreen();
     } else if (key.keyType == CardputerKey::ENTER && !_items.empty()) {
         extern App app;
-        _manager->pushScreen(new PlaybackScreen(_jellyfinClient, &app.getAudio(), _items[_selectedIndex].id, _items[_selectedIndex].name));
+        _manager->pushScreen(new PlaybackScreen(_jellyfinClient, _items[_selectedIndex].id, _items[_selectedIndex].name));
     }
 }

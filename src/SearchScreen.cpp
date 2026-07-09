@@ -215,7 +215,7 @@ void SearchScreen::handleKey(const KeyInput& key) {
             
             if (type == "Audio") {
                 extern App app;
-                _manager->pushScreen(new PlaybackScreen(_jellyfinClient, &app.getAudio(), itemId, name));
+                _manager->pushScreen(new PlaybackScreen(_jellyfinClient, itemId, name));
             } else if (type == "MusicAlbum") {
                 _manager->pushScreen(new SongsScreen(_jellyfinClient, itemId, name));
             } else if (type == "MusicArtist") {

@@ -2,9 +2,8 @@
 #include "App.h"
 #include <Arduino.h>
 
-PlaybackScreen::PlaybackScreen(JellyfinClient* client, Audio* audio, const String& trackId, const String& trackName)
+PlaybackScreen::PlaybackScreen(JellyfinClient* client, const String& trackId, const String& trackName)
     : _jellyfinClient(client),
-      _audio(audio),
       _trackId(trackId),
       _trackName(trackName),
       _albumId(""),
@@ -13,22 +12,35 @@ PlaybackScreen::PlaybackScreen(JellyfinClient* client, Audio* audio, const Strin
       _localArtPath(""),
       _isLoadingMetadata(true),
       _hasError(false),
-      _animCounter(0) {
+      _animCounter(0),
+      _metadataFetched(false) {
 }
 
 void PlaybackScreen::init() {
     _isLoadingMetadata = true;
     _hasError = false;
     _animCounter = 0;
+    _metadataFetched = false;
     
-    // Stop any stale playback before starting new stream
-    _audio->stopSong();
+    // Stop any stale playback and start streaming the new URL IMMEDIATELY
+    // This completely removes any delay when pressing Enter!
+    extern App app;
+    app.stopAudio();
     
-    fetchTrackMetadata();
+    String streamUrl = _jellyfinClient->getHost() + "/Audio/" + _trackId + "/stream.mp3?static=true&api_key=" + _jellyfinClient->getToken();
+    Serial.print("[Playback] Pre-connecting to audio stream: ");
+    Serial.println(streamUrl);
+    app.playUrl(streamUrl);
 }
 
 void PlaybackScreen::update(uint32_t dt) {
     _animCounter += dt;
+    
+    // Fetch metadata and cache artwork asynchronously after the screen has transitioned
+    if (_isLoadingMetadata && !_metadataFetched) {
+        _metadataFetched = true;
+        fetchTrackMetadata();
+    }
 }
 
 void PlaybackScreen::fetchTrackMetadata() {
@@ -58,30 +70,24 @@ void PlaybackScreen::fetchTrackMetadata() {
                 _artistName = "Unknown Artist";
             }
             
-            // Download/resolve album art cache path
+            // Download/resolve album art cache path (fallback to RAM)
             extern App app;
             if (_albumId.length() > 0) {
                 _localArtPath = app.getAlbumArtManager().getArtworkPath(_albumId);
             }
             
             _isLoadingMetadata = false;
-            
-            // Construct direct Jellyfin static audio streaming link
-            String streamUrl = _jellyfinClient->getHost() + "/Audio/" + _trackId + "/stream.mp3?static=true&api_key=" + _jellyfinClient->getToken();
-            Serial.print("[Playback] Connecting to stream URL: ");
-            Serial.println(streamUrl);
-            
-            // Trigger background streaming download
-            _audio->connecttohost(streamUrl.c_str());
         } else {
-            _hasError = true;
+            _artistName = "Unknown Artist";
+            _albumName = "Unknown Album";
             _isLoadingMetadata = false;
-            Serial.println("[Playback] JSON parse error");
+            Serial.println("[Playback] JSON parse error, using fallbacks");
         }
     } else {
-        _hasError = true;
+        _artistName = "Unknown Artist";
+        _albumName = "Unknown Album";
         _isLoadingMetadata = false;
-        Serial.println("[Playback] HTTP query failed");
+        Serial.println("[Playback] HTTP query failed, using fallbacks");
     }
 }
 
@@ -143,11 +149,11 @@ void PlaybackScreen::draw(M5Canvas& canvas) {
         canvas.setCursor(textX, 64);
         canvas.print("VOLUME: ");
         canvas.setTextColor(DisplayManager::COLOR_CYAN);
-        canvas.print(String(_audio->getVolume()));
+        canvas.print(String(app.getVolume()));
         
         // Progress Time Bar
-        uint32_t currentSec = _audio->getAudioCurrentTime();
-        uint32_t totalSec = _audio->getAudioFileDuration();
+        uint32_t currentSec = app.getAudioPosition();
+        uint32_t totalSec = app.getAudioDuration();
         
         int barY = 80;
         int barW = 115;
@@ -166,7 +172,7 @@ void PlaybackScreen::draw(M5Canvas& canvas) {
         
         // Playback Status Indicator
         canvas.setCursor(textX, 102);
-        if (_audio->isRunning()) {
+        if (app.isAudioPlaying() && !app.isAudioPaused()) {
             canvas.setTextColor(DisplayManager::COLOR_CYAN);
             canvas.print("[PLAYING]");
         } else {
@@ -187,20 +193,21 @@ void PlaybackScreen::draw(M5Canvas& canvas) {
 }
 
 void PlaybackScreen::handleKey(const KeyInput& key) {
+    extern App app;
     if (key.keyType == CardputerKey::ESC || key.keyType == CardputerKey::BACKSPACE) {
-        _audio->stopSong(); // Stop I2S streaming completely
+        app.stopAudio(); // Stop streaming completely
         _manager->popScreen(); // Return to catalog list
     } else if (key.keyType == CardputerKey::ENTER || (key.keyType == CardputerKey::CHAR && key.character == ' ')) {
-        _audio->pauseResume(); // Toggle play/pause state
+        app.togglePause(); // Toggle play/pause state
     } else if (key.keyType == CardputerKey::CHAR && (key.character == '+' || key.character == '=')) {
-        int vol = _audio->getVolume();
+        int vol = app.getVolume();
         if (vol < 21) {
-            _audio->setVolume(vol + 1);
+            app.setVolume(vol + 1);
         }
     } else if (key.keyType == CardputerKey::CHAR && (key.character == '-' || key.character == '_')) {
-        int vol = _audio->getVolume();
+        int vol = app.getVolume();
         if (vol > 0) {
-            _audio->setVolume(vol - 1);
+            app.setVolume(vol - 1);
         }
     }
 }

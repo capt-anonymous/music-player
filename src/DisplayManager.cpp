@@ -1,4 +1,5 @@
 #include "DisplayManager.h"
+#include "App.h"
 #include <SD.h>
 
 DisplayManager::DisplayManager() : _canvas(&M5Cardputer.Display) {
@@ -58,7 +59,15 @@ void DisplayManager::drawAlbumArt(const String& localPath, int x, int y, int w, 
     bool drawn = false;
     
     // Open the cached file manually and stream the data directly to the LovyanGFX decoder
-    if (localPath.length() > 0 && SD.exists(localPath.c_str())) {
+    if (localPath == "RAM") {
+        extern App app;
+        const uint8_t* ramBuffer = app.getAlbumArtManager().getRamBuffer();
+        size_t ramSize = app.getAlbumArtManager().getRamSize();
+        if (ramBuffer && ramSize > 0) {
+            _canvas.drawJpg(ramBuffer, ramSize, x, y, w, h);
+            drawn = true;
+        }
+    } else if (localPath.length() > 0 && SD.exists(localPath.c_str())) {
         File file = SD.open(localPath.c_str(), FILE_READ);
         if (file) {
             _canvas.drawJpg(&file, x, y, w, h);

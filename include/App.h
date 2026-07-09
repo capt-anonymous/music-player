@@ -8,7 +8,10 @@
 #include "JellyfinClient.h"
 #include "StorageManager.h"
 #include "AlbumArtManager.h"
-#include "Audio.h"
+#include "AudioOutputM5Speaker.h"
+#include <AudioGeneratorMP3.h>
+#include <AudioFileSourceHTTPStream.h>
+#include <AudioFileSourceBuffer.h>
 
 class App {
 public:
@@ -23,7 +26,17 @@ public:
     StorageManager& getStorageManager() { return _storageManager; }
     AlbumArtManager& getAlbumArtManager() { return _albumArtManager; }
     DisplayManager& getDisplayManager() { return _displayManager; }
-    Audio& getAudio() { return _audio; }
+    
+    // Audio Control Wrapper Methods
+    void playUrl(const String& url);
+    void stopAudio();
+    void togglePause();
+    bool isAudioPlaying() const;
+    bool isAudioPaused() const;
+    void setVolume(int volume);
+    int getVolume() const;
+    uint32_t getAudioPosition() const;
+    uint32_t getAudioDuration() const;
 
 private:
     KeyboardManager _keyboardManager;
@@ -33,7 +46,14 @@ private:
     JellyfinClient _jellyfinClient;
     StorageManager _storageManager;
     AlbumArtManager _albumArtManager;
-    Audio _audio;
+    
+    // ESP8266Audio Decoders and Handlers
+    AudioOutputM5Speaker* _audioOut;
+    AudioFileSourceHTTPStream* _audioHttp;
+    AudioFileSourceBuffer* _audioBuffer;
+    AudioGeneratorMP3* _audioMp3;
+    int _volume; // Range: 0 to 21
+    bool _isPaused;
     
     uint32_t _lastTickMs;
 };
