@@ -8,6 +8,7 @@
 #include "JellyfinClient.h"
 #include "StorageManager.h"
 #include "AlbumArtManager.h"
+#include "Audio.h"
 
 class App {
 public:
@@ -21,6 +22,7 @@ public:
     JellyfinClient& getJellyfinClient() { return _jellyfinClient; }
     StorageManager& getStorageManager() { return _storageManager; }
     AlbumArtManager& getAlbumArtManager() { return _albumArtManager; }
+    Audio& getAudio() { return _audio; }
 
 private:
     KeyboardManager _keyboardManager;
@@ -30,6 +32,7 @@ private:
     JellyfinClient _jellyfinClient;
     StorageManager _storageManager;
     AlbumArtManager _albumArtManager;
+    Audio _audio;
     
     uint32_t _lastTickMs;
 };

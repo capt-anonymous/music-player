@@ -1,4 +1,5 @@
 #include "LibraryScreens.h"
+#include "PlaybackScreen.h"
 #include "App.h"
 #include <Arduino.h>
 
@@ -495,16 +496,7 @@ void SongsScreen::handleKey(const KeyInput& key) {
     } else if (key.keyType == CardputerKey::ESC || key.keyType == CardputerKey::BACKSPACE) {
         _manager->popScreen();
     } else if (key.keyType == CardputerKey::ENTER && !_items.empty()) {
-        // Output track details to Serial for debugging. Audio streaming will link here in Milestone 6!
-        Serial.print("[Songs] Selected Track to Play: ");
-        Serial.print(_items[_selectedIndex].name);
-        Serial.print(" | ID: ");
-        Serial.println(_items[_selectedIndex].id);
-        
-        // Trigger a test image download for this track's ID!
         extern App app;
-        String path = app.getAlbumArtManager().getArtworkPath(_items[_selectedIndex].id);
-        Serial.print("[Songs] Artwork cached path: ");
-        Serial.println(path);
+        _manager->pushScreen(new PlaybackScreen(_jellyfinClient, &app.getAudio(), _items[_selectedIndex].id, _items[_selectedIndex].name));
     }
 }

@@ -1,4 +1,6 @@
 #include "SearchScreen.h"
+#include "PlaybackScreen.h"
+#include "App.h"
 #include <Arduino.h>
 
 SearchScreen::SearchScreen(JellyfinClient* client)
@@ -212,8 +214,8 @@ void SearchScreen::handleKey(const KeyInput& key) {
             String name = _items[_selectedIndex].name.substring(5);
             
             if (type == "Audio") {
-                Serial.print("[Search] Selected track to stream: ");
-                Serial.println(name);
+                extern App app;
+                _manager->pushScreen(new PlaybackScreen(_jellyfinClient, &app.getAudio(), itemId, name));
             } else if (type == "MusicAlbum") {
                 _manager->pushScreen(new SongsScreen(_jellyfinClient, itemId, name));
             } else if (type == "MusicArtist") {

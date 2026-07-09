@@ -10,8 +10,11 @@ App::~App() {
 
 void App::begin() {
     auto cfg = M5.config();
+    cfg.internal_spk = false; // Disable M5Unified speaker driver to free pins
+    
     // Initialize Stamps3 board, keyboard matrix, and core hardware interfaces
     M5Cardputer.begin(cfg, true);
+    M5Cardputer.Speaker.end(); // Double safeguard to release I2S line resources
     
     // Set up screen canvas buffer
     _displayManager.begin();
@@ -25,6 +28,11 @@ void App::begin() {
     // Initialize Jellyfin client and verify saved session
     _jellyfinClient.begin();
     
+    // Configure dedicated I2S speaker output routing
+    // Pins on Cardputer: BCLK=41, LRCK=43, DOUT=42
+    _audio.setPinout(41, 43, 42);
+    _audio.setVolume(12); // Default volume (scale of 0-21)
+    
     // Start with the cyberpunk Boot animation
     _screenManager.pushScreen(new BootScreen());
     _screenManager.processPendingTransitions();
@@ -33,12 +41,17 @@ void App::begin() {
 }
 
 void App::loop() {
+    M5Cardputer.update();
+    
+    // Run audio streaming engine updates in background
+    _audio.loop();
+    
+    // Calculate delta time
     uint32_t currentMs = millis();
     uint32_t dt = currentMs - _lastTickMs;
     _lastTickMs = currentMs;
     
     // Update internal M5Unified key and power registers
-    M5Cardputer.update();
     
     // Scan keyboard and update event queue
     _keyboardManager.update();
