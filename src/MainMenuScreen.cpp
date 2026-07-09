@@ -1,6 +1,7 @@
 #include "MainMenuScreen.h"
 #include "PlaceholderScreens.h"
 #include "WiFiSetupScreen.h"
+#include "JellyfinLoginScreen.h"
 #include "App.h"
 #include <Arduino.h>
 
@@ -87,7 +88,7 @@ void MainMenuScreen::handleKey(const KeyInput& key) {
                 _manager->pushScreen(new WiFiSetupScreen(&app.getWiFiManager()));
                 break;
             case 1:
-                _manager->pushScreen(new JellyfinLoginScreen());
+                _manager->pushScreen(new JellyfinLoginScreen(&app.getJellyfinClient()));
                 break;
             case 2:
                 _manager->pushScreen(new MusicLibraryScreen());

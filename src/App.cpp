@@ -19,6 +19,9 @@ void App::begin() {
     // Initialize Wi-Fi and load saved credentials
     _wifiManager.begin();
     
+    // Initialize Jellyfin client and verify saved session
+    _jellyfinClient.begin();
+    
     // Start with the cyberpunk Boot animation
     _screenManager.pushScreen(new BootScreen());
     _screenManager.processPendingTransitions();

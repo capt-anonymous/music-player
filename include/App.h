@@ -5,6 +5,7 @@
 #include "DisplayManager.h"
 #include "ScreenManager.h"
 #include "WiFiManager.h"
+#include "JellyfinClient.h"
 
 class App {
 public:
@@ -15,12 +16,14 @@ public:
     void loop();
     
     WiFiManager& getWiFiManager() { return _wifiManager; }
+    JellyfinClient& getJellyfinClient() { return _jellyfinClient; }
 
 private:
     KeyboardManager _keyboardManager;
     DisplayManager _displayManager;
     ScreenManager _screenManager;
     WiFiManager _wifiManager;
+    JellyfinClient _jellyfinClient;
     
     uint32_t _lastTickMs;
 };
