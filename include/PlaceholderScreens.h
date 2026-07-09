@@ -3,35 +3,6 @@
 
 #include "ScreenManager.h"
 
-class JellyfinLoginScreen : public Screen {
-public:
-    virtual void init() override {}
-    virtual void update(uint32_t dt) override {}
-    virtual void draw(M5Canvas& canvas) override {
-        canvas.fillScreen(DisplayManager::COLOR_BG);
-        canvas.drawFastHLine(0, 14, 240, DisplayManager::COLOR_CYAN);
-        canvas.setTextColor(DisplayManager::COLOR_CYAN);
-        canvas.setCursor(6, 3);
-        canvas.print("JELLYFIN LOGIN");
-        
-        canvas.setTextColor(DisplayManager::COLOR_GREEN);
-        canvas.setCursor(10, 30);
-        canvas.println("[JELLYFIN SERVER LINKAGE]");
-        canvas.println();
-        canvas.println(" HOST:     --");
-        canvas.println(" USERNAME: --");
-        canvas.println(" STATUS:   OFFLINE");
-        canvas.println();
-        canvas.setTextColor(DisplayManager::COLOR_GRAY);
-        canvas.println(" Press Backspace to return...");
-    }
-    virtual void handleKey(const KeyInput& key) override {
-        if (key.keyType == CardputerKey::ESC || key.keyType == CardputerKey::BACKSPACE) {
-            _manager->popScreen();
-        }
-    }
-};
-
 class MusicLibraryScreen : public Screen {
 public:
     virtual void init() override {}
