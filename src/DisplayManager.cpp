@@ -55,10 +55,19 @@ void DisplayManager::drawFooter(const char* status) {
 }
 
 void DisplayManager::drawAlbumArt(const String& localPath, int x, int y, int w, int h) {
-    // If cache file is available on SD card, decode it directly
+    bool drawn = false;
+    
+    // Open the cached file manually and stream the data directly to the LovyanGFX decoder
     if (localPath.length() > 0 && SD.exists(localPath.c_str())) {
-        _canvas.drawJpgFile((fs::FS&)SD, localPath.c_str(), x, y, w, h);
-    } else {
+        File file = SD.open(localPath.c_str(), FILE_READ);
+        if (file) {
+            _canvas.drawJpg(&file, x, y, w, h);
+            file.close();
+            drawn = true;
+        }
+    }
+    
+    if (!drawn) {
         // Draw cyberpunk decorative placeholder box
         _canvas.drawRect(x, y, w, h, COLOR_GRAY);
         _canvas.drawRect(x + 2, y + 2, w - 4, h - 4, COLOR_CYAN);
