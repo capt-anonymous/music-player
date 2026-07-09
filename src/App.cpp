@@ -12,6 +12,12 @@ void App::begin() {
     auto cfg = M5.config();
     cfg.internal_spk = true; // Enable internal speaker to let M5Unified initialize the ES8311 codec on Cardputer ADV
     
+    // Re-route M5Unified speaker driver to I2S_NUM_1 to prevent DMA/interrupt conflicts 
+    // with ESP32-audioI2S (which requires exclusive access to I2S_NUM_0)
+    auto spk_cfg = M5.Speaker.config();
+    spk_cfg.i2s_port = I2S_NUM_1;
+    M5.Speaker.config(spk_cfg);
+    
     // Initialize Stamps3 board, keyboard matrix, and core hardware interfaces
     M5Cardputer.begin(cfg, true);
     
