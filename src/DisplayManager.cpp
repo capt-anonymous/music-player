@@ -57,7 +57,7 @@ void DisplayManager::drawFooter(const char* status) {
 void DisplayManager::drawAlbumArt(const String& localPath, int x, int y, int w, int h) {
     // If cache file is available on SD card, decode it directly
     if (localPath.length() > 0 && SD.exists(localPath.c_str())) {
-        _canvas.drawJpgFile(SD, localPath.c_str(), x, y, w, h);
+        _canvas.drawJpgFile((fs::FS&)SD, localPath.c_str(), x, y, w, h);
     } else {
         // Draw cyberpunk decorative placeholder box
         _canvas.drawRect(x, y, w, h, COLOR_GRAY);

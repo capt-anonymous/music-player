@@ -213,7 +213,7 @@ void AlbumsScreen::fetchAlbums() {
                 LibraryItem li;
                 li.name = item["Name"].as<String>();
                 li.id = item["Id"].as<String>();
-                if (item.containsKey("AlbumArtist")) {
+                if (item["AlbumArtist"].is<String>()) {
                     li.detail = item["AlbumArtist"].as<String>();
                 } else {
                     li.detail = "";
