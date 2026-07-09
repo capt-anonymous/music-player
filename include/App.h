@@ -22,6 +22,7 @@ public:
     JellyfinClient& getJellyfinClient() { return _jellyfinClient; }
     StorageManager& getStorageManager() { return _storageManager; }
     AlbumArtManager& getAlbumArtManager() { return _albumArtManager; }
+    DisplayManager& getDisplayManager() { return _displayManager; }
     Audio& getAudio() { return _audio; }
 
 private:

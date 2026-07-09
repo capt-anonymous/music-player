@@ -44,15 +44,15 @@ void PlaybackScreen::fetchTrackMetadata() {
         DeserializationError err = deserializeJson(doc, response);
         
         if (!err) {
-            if (doc.containsKey("AlbumId")) {
+            if (doc["AlbumId"].is<String>()) {
                 _albumId = doc["AlbumId"].as<String>();
             }
-            if (doc.containsKey("Album")) {
+            if (doc["Album"].is<String>()) {
                 _albumName = doc["Album"].as<String>();
             }
             
             // Extract Artist name
-            if (doc.containsKey("ArtistItems") && doc["ArtistItems"].size() > 0) {
+            if (doc["ArtistItems"].is<JsonArray>() && doc["ArtistItems"].size() > 0) {
                 _artistName = doc["ArtistItems"][0]["Name"].as<String>();
             } else {
                 _artistName = "Unknown Artist";
@@ -107,7 +107,8 @@ void PlaybackScreen::draw(M5Canvas& canvas) {
         canvas.print("Playback failed. Verify network link.");
     } else {
         // Draw 96x96 Album Art on the left side
-        _manager->getDisplayManager().drawAlbumArt(_localArtPath, 10, 20, 96, 96);
+        extern App app;
+        app.getDisplayManager().drawAlbumArt(_localArtPath, 10, 20, 96, 96);
         
         // Draw metadata details on the right side
         int textX = 115;
