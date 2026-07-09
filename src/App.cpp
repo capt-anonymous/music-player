@@ -10,7 +10,7 @@ App::~App() {
 
 void App::begin() {
     auto cfg = M5.config();
-    cfg.board = m5::board_t::board_M5CardputerADV; // Force Cardputer ADV board profile to set I2C SCL=9, SDA=8
+    cfg.fallback_board = m5::board_t::board_M5CardputerADV; // Force Cardputer ADV board profile to set I2C SCL=9, SDA=8
     cfg.internal_spk = true; // Enable internal speaker to let M5Unified initialize the ES8311 codec on Cardputer ADV
     
     // Re-route M5Unified speaker driver to I2S_NUM_1 to prevent DMA/interrupt conflicts 
