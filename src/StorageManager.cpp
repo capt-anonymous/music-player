@@ -6,6 +6,12 @@ StorageManager::StorageManager() : _isReady(false) {
 
 bool StorageManager::begin() {
     Serial.println("[Storage] Initializing SPI bus for SD Card...");
+    
+    // Explicitly configure SD CS pin as OUTPUT and deselect it (HIGH)
+    // This prevents the SD card from locking up the shared SPI bus with the LCD screen
+    pinMode(PIN_CS, OUTPUT);
+    digitalWrite(PIN_CS, HIGH);
+    
     SPI.begin(PIN_SCK, PIN_MISO, PIN_MOSI, PIN_CS);
     
     // Mount the SD card at 15MHz SPI frequency
@@ -17,6 +23,9 @@ bool StorageManager::begin() {
     } else {
         _isReady = false;
         Serial.println("[Storage] WARNING: microSD card mount failed. Operating in bypass mode.");
+        
+        // Force SD CS pin HIGH to deselect the card and free up the shared MISO line!
+        digitalWrite(PIN_CS, HIGH);
         return false;
     }
 }
