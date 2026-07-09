@@ -10,7 +10,7 @@ App::~App() {
 
 void App::begin() {
     auto cfg = M5.config();
-    cfg.internal_spk = false; // Disable M5Unified speaker driver to free pins
+    cfg.internal_spk = true; // Enable internal speaker to let M5Unified initialize the ES8311 codec on Cardputer ADV
     
     // Initialize Stamps3 board, keyboard matrix, and core hardware interfaces
     M5Cardputer.begin(cfg, true);
