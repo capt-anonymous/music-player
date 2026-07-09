@@ -1,4 +1,5 @@
 #include "DisplayManager.h"
+#include <SD.h>
 
 DisplayManager::DisplayManager() : _canvas(&M5Cardputer.Display) {
 }
@@ -51,4 +52,25 @@ void DisplayManager::drawFooter(const char* status) {
     _canvas.setTextColor(COLOR_GREEN, COLOR_BG);
     _canvas.setCursor(220, 124);
     _canvas.print(">_");
+}
+
+void DisplayManager::drawAlbumArt(const String& localPath, int x, int y, int w, int h) {
+    // If cache file is available on SD card, decode it directly
+    if (localPath.length() > 0 && SD.exists(localPath.c_str())) {
+        _canvas.drawJpgFile(SD, localPath.c_str(), x, y, w, h);
+    } else {
+        // Draw cyberpunk decorative placeholder box
+        _canvas.drawRect(x, y, w, h, COLOR_GRAY);
+        _canvas.drawRect(x + 2, y + 2, w - 4, h - 4, COLOR_CYAN);
+        
+        // Draw a green vector music note icon inside the placeholder box
+        int noteX = x + (w / 2) + 2;
+        int noteY = y + (h / 2) - 10;
+        _canvas.fillRect(noteX, noteY, 2, 14, COLOR_GREEN);
+        _canvas.fillCircle(noteX - 2, noteY + 12, 3, COLOR_GREEN);
+        
+        _canvas.setTextColor(COLOR_CYAN, COLOR_BG);
+        _canvas.setCursor(x + 8, y + 8);
+        _canvas.print("NO ART");
+    }
 }

@@ -6,6 +6,8 @@
 #include "ScreenManager.h"
 #include "WiFiManager.h"
 #include "JellyfinClient.h"
+#include "StorageManager.h"
+#include "AlbumArtManager.h"
 
 class App {
 public:
@@ -17,6 +19,8 @@ public:
     
     WiFiManager& getWiFiManager() { return _wifiManager; }
     JellyfinClient& getJellyfinClient() { return _jellyfinClient; }
+    StorageManager& getStorageManager() { return _storageManager; }
+    AlbumArtManager& getAlbumArtManager() { return _albumArtManager; }
 
 private:
     KeyboardManager _keyboardManager;
@@ -24,6 +28,8 @@ private:
     ScreenManager _screenManager;
     WiFiManager _wifiManager;
     JellyfinClient _jellyfinClient;
+    StorageManager _storageManager;
+    AlbumArtManager _albumArtManager;
     
     uint32_t _lastTickMs;
 };

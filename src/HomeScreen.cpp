@@ -1,31 +1,27 @@
-#include "MainMenuScreen.h"
-#include "PlaceholderScreens.h"
-#include "WiFiSetupScreen.h"
-#include "JellyfinLoginScreen.h"
 #include "HomeScreen.h"
-#include "App.h"
+#include "LibraryScreens.h"
+#include "SearchScreen.h"
 #include <Arduino.h>
 
-extern App app;
-
-MainMenuScreen::MainMenuScreen() : _selectedIndex(0) {
+HomeScreen::HomeScreen(JellyfinClient* client)
+    : _jellyfinClient(client), _selectedIndex(0) {
 }
 
-void MainMenuScreen::init() {
+void HomeScreen::init() {
     _menuItems = {
-        "1. CONNECT WI-FI",
-        "2. JELLYFIN LOGIN",
-        "3. MUSIC LIBRARY",
-        "4. SYSTEM SETTINGS",
-        "5. SYSTEM ABOUT"
+        "1. BROWSE ARTISTS",
+        "2. BROWSE ALBUMS",
+        "3. BROWSE SONGS",
+        "4. SEARCH LIBRARY",
+        "5. LOG OUT JELLYFIN"
     };
     _selectedIndex = 0;
 }
 
-void MainMenuScreen::update(uint32_t dt) {
+void HomeScreen::update(uint32_t dt) {
 }
 
-void MainMenuScreen::draw(M5Canvas& canvas) {
+void HomeScreen::draw(M5Canvas& canvas) {
     canvas.fillScreen(DisplayManager::COLOR_BG);
     
     // Draw Header
@@ -33,18 +29,21 @@ void MainMenuScreen::draw(M5Canvas& canvas) {
     canvas.setTextColor(DisplayManager::COLOR_CYAN);
     canvas.setTextSize(1);
     canvas.setCursor(6, 3);
-    canvas.print("CYBER MUSIC TERMINAL");
+    canvas.print("MUSIC LIBRARY PORTAL");
     
-    // Draw Menu Title
+    // Draw Sub-header with server state
     canvas.setTextColor(DisplayManager::COLOR_GREEN);
     canvas.setCursor(10, 22);
-    canvas.print("[SYSTEM MAIN MENU]");
+    canvas.print("[CONNECTED: ");
+    canvas.setTextColor(DisplayManager::COLOR_CYAN);
+    canvas.print(_jellyfinClient->getUsername());
+    canvas.setTextColor(DisplayManager::COLOR_GREEN);
+    canvas.print("]");
     
-    // Draw Menu items
-    int y = 38;
+    // Draw menu options
+    int y = 40;
     for (size_t i = 0; i < _menuItems.size(); ++i) {
         if (i == _selectedIndex) {
-            // Highlight selected item
             canvas.fillRect(8, y - 2, 224, 13, DisplayManager::COLOR_SEL_BG);
             canvas.setTextColor(DisplayManager::COLOR_SEL_FG);
         } else {
@@ -56,7 +55,7 @@ void MainMenuScreen::draw(M5Canvas& canvas) {
         y += 15;
     }
     
-    // Draw Footer (Updated keys instruction)
+    // Footer
     canvas.drawFastHLine(0, 120, 240, DisplayManager::COLOR_CYAN);
     canvas.setTextColor(DisplayManager::COLOR_GREEN);
     canvas.setCursor(6, 124);
@@ -67,7 +66,7 @@ void MainMenuScreen::draw(M5Canvas& canvas) {
     canvas.print(">_");
 }
 
-void MainMenuScreen::handleKey(const KeyInput& key) {
+void HomeScreen::handleKey(const KeyInput& key) {
     bool upPressed = (key.keyType == CardputerKey::UP) || (key.keyType == CardputerKey::CHAR && key.character == ';');
     bool downPressed = (key.keyType == CardputerKey::DOWN) || (key.keyType == CardputerKey::CHAR && key.character == '/');
     
@@ -75,38 +74,36 @@ void MainMenuScreen::handleKey(const KeyInput& key) {
         if (_selectedIndex > 0) {
             _selectedIndex--;
         } else {
-            _selectedIndex = _menuItems.size() - 1; // Wrap around
+            _selectedIndex = _menuItems.size() - 1;
         }
     } else if (downPressed) {
         if (_selectedIndex < _menuItems.size() - 1) {
             _selectedIndex++;
         } else {
-            _selectedIndex = 0; // Wrap around
+            _selectedIndex = 0;
         }
+    } else if (key.keyType == CardputerKey::ESC || key.keyType == CardputerKey::BACKSPACE) {
+        _manager->popScreen(); // Returns to Main Menu
     } else if (key.keyType == CardputerKey::ENTER) {
         switch (_selectedIndex) {
             case 0:
-                _manager->pushScreen(new WiFiSetupScreen(&app.getWiFiManager()));
+                _manager->pushScreen(new ArtistsScreen(_jellyfinClient));
                 break;
             case 1:
-                _manager->pushScreen(new JellyfinLoginScreen(&app.getJellyfinClient()));
+                _manager->pushScreen(new AlbumsScreen(_jellyfinClient));
                 break;
             case 2:
-                if (app.getJellyfinClient().hasToken()) {
-                    _manager->pushScreen(new HomeScreen(&app.getJellyfinClient()));
-                } else {
-                    _manager->pushScreen(new JellyfinLoginScreen(&app.getJellyfinClient()));
-                }
+                _manager->pushScreen(new SongsScreen(_jellyfinClient));
                 break;
             case 3:
-                _manager->pushScreen(new SettingsScreen());
+                _manager->pushScreen(new SearchScreen(_jellyfinClient));
                 break;
             case 4:
-                _manager->pushScreen(new AboutScreen());
+                _jellyfinClient->logout();
+                _manager->popScreen(); // Returns to Main Menu
                 break;
             default:
                 break;
         }
     }
 }
-

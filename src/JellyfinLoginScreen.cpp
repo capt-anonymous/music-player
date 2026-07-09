@@ -20,6 +20,11 @@ void JellyfinLoginScreen::init() {
     _focusIndex = 0;
     _isConnecting = false;
     _animCounter = 0;
+    
+    // Reset stale errors so we start with a clean interface
+    if (_jellyfinClient->getStatus() != JellyfinStatus::LOGGED_IN) {
+        _jellyfinClient->setStatus(JellyfinStatus::LOGGED_OUT);
+    }
 }
 
 void JellyfinLoginScreen::update(uint32_t dt) {

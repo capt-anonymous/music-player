@@ -36,6 +36,14 @@ public:
     bool hasToken() const { return _token.length() > 0; }
     
     bool sendGetRequest(const String& endpoint, String& response);
+    
+    // Catalog browse helpers (pagination-limited to protect heap)
+    bool getArtists(String& jsonOut, int limit = 30);
+    bool getAlbums(String& jsonOut, int limit = 30);
+    bool getSongs(String& jsonOut, int limit = 30);
+    bool getArtistAlbums(const String& artistId, String& jsonOut);
+    bool getAlbumSongs(const String& albumId, String& jsonOut);
+    bool searchItems(const String& query, String& jsonOut);
 
 private:
     JellyfinStatus _status;

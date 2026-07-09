@@ -177,3 +177,54 @@ void JellyfinClient::clearSession() {
     _token = "";
     _userId = "";
 }
+
+// Simple URL Encoder for query searches
+static String urlEncodeQuery(const String& value) {
+    String encoded = "";
+    char c;
+    for (size_t i = 0; i < value.length(); i++) {
+        c = value.charAt(i);
+        if (isalnum(c)) {
+            encoded += c;
+        } else if (c == ' ') {
+            encoded += "%20";
+        } else {
+            encoded += '%';
+            char hex[3];
+            sprintf(hex, "%02X", (unsigned char)c);
+            encoded += hex;
+        }
+    }
+    return encoded;
+}
+
+bool JellyfinClient::getArtists(String& jsonOut, int limit) {
+    String endpoint = "/Artists?userId=" + _userId + "&Limit=" + String(limit) + "&SortBy=SortName";
+    return sendGetRequest(endpoint, jsonOut);
+}
+
+bool JellyfinClient::getAlbums(String& jsonOut, int limit) {
+    String endpoint = "/Items?userId=" + _userId + "&IncludeItemTypes=MusicAlbum&Recursive=true&Limit=" + String(limit) + "&SortBy=SortName";
+    return sendGetRequest(endpoint, jsonOut);
+}
+
+bool JellyfinClient::getSongs(String& jsonOut, int limit) {
+    String endpoint = "/Items?userId=" + _userId + "&IncludeItemTypes=Audio&Recursive=true&Limit=" + String(limit) + "&SortBy=SortName";
+    return sendGetRequest(endpoint, jsonOut);
+}
+
+bool JellyfinClient::getArtistAlbums(const String& artistId, String& jsonOut) {
+    String endpoint = "/Items?userId=" + _userId + "&IncludeItemTypes=MusicAlbum&ArtistIds=" + artistId + "&Recursive=true&SortBy=SortName";
+    return sendGetRequest(endpoint, jsonOut);
+}
+
+bool JellyfinClient::getAlbumSongs(const String& albumId, String& jsonOut) {
+    String endpoint = "/Items?userId=" + _userId + "&ParentId=" + albumId + "&SortBy=SortName,IndexNumber";
+    return sendGetRequest(endpoint, jsonOut);
+}
+
+bool JellyfinClient::searchItems(const String& query, String& jsonOut) {
+    String encodedQuery = urlEncodeQuery(query);
+    String endpoint = "/Items?userId=" + _userId + "&SearchTerm=" + encodedQuery + "&IncludeItemTypes=Audio,MusicAlbum,MusicArtist&Recursive=true&Limit=20";
+    return sendGetRequest(endpoint, jsonOut);
+}

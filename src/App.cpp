@@ -2,7 +2,7 @@
 #include "BootScreen.h"
 #include <Arduino.h>
 
-App::App() : _lastTickMs(0) {
+App::App() : _albumArtManager(&_jellyfinClient, &_storageManager), _lastTickMs(0) {
 }
 
 App::~App() {
@@ -15,6 +15,9 @@ void App::begin() {
     
     // Set up screen canvas buffer
     _displayManager.begin();
+    
+    // Initialize storage mount (microSD Card)
+    _storageManager.begin();
     
     // Initialize Wi-Fi and load saved credentials
     _wifiManager.begin();

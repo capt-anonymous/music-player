@@ -3,34 +3,6 @@
 
 #include "ScreenManager.h"
 
-class MusicLibraryScreen : public Screen {
-public:
-    virtual void init() override {}
-    virtual void update(uint32_t dt) override {}
-    virtual void draw(M5Canvas& canvas) override {
-        canvas.fillScreen(DisplayManager::COLOR_BG);
-        canvas.drawFastHLine(0, 14, 240, DisplayManager::COLOR_CYAN);
-        canvas.setTextColor(DisplayManager::COLOR_CYAN);
-        canvas.setCursor(6, 3);
-        canvas.print("MUSIC LIBRARY");
-        
-        canvas.setTextColor(DisplayManager::COLOR_GREEN);
-        canvas.setCursor(10, 30);
-        canvas.println("[CYBER AUDIO CORE]");
-        canvas.println();
-        canvas.println(" DB INDEX:   0 TRACKS");
-        canvas.println(" QUEUE STATE: EMPTY");
-        canvas.println();
-        canvas.setTextColor(DisplayManager::COLOR_GRAY);
-        canvas.println(" Press Backspace to return...");
-    }
-    virtual void handleKey(const KeyInput& key) override {
-        if (key.keyType == CardputerKey::ESC || key.keyType == CardputerKey::BACKSPACE) {
-            _manager->popScreen();
-        }
-    }
-};
-
 class SettingsScreen : public Screen {
 public:
     virtual void init() override {}
