@@ -2,8 +2,7 @@
 #include "BootScreen.h"
 #include <Arduino.h>
 
-App::App() : _albumArtManager(&_jellyfinClient, &_storageManager),
-             _audioOut(nullptr),
+App::App() : _audioOut(nullptr),
              _audioHttp(nullptr),
              _audioBuffer(nullptr),
              _audioMp3(nullptr),
@@ -182,5 +181,9 @@ uint32_t App::getAudioDuration() const {
         return _audioHttp->getSize() / 16000;
     }
     return 0;
+}
+
+const int16_t* App::getAudioBuffer() const {
+    return _audioOut ? _audioOut->getBuffer() : nullptr;
 }
 

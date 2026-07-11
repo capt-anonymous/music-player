@@ -7,7 +7,6 @@
 #include "WiFiManager.h"
 #include "JellyfinClient.h"
 #include "StorageManager.h"
-#include "AlbumArtManager.h"
 #include "AudioOutputM5Speaker.h"
 #include <AudioGeneratorMP3.h>
 #include <AudioFileSourceHTTPStream.h>
@@ -24,7 +23,6 @@ public:
     WiFiManager& getWiFiManager() { return _wifiManager; }
     JellyfinClient& getJellyfinClient() { return _jellyfinClient; }
     StorageManager& getStorageManager() { return _storageManager; }
-    AlbumArtManager& getAlbumArtManager() { return _albumArtManager; }
     DisplayManager& getDisplayManager() { return _displayManager; }
     
     // Audio Control Wrapper Methods
@@ -37,6 +35,7 @@ public:
     int getVolume() const;
     uint32_t getAudioPosition() const;
     uint32_t getAudioDuration() const;
+    const int16_t* getAudioBuffer() const;
 
 private:
     KeyboardManager _keyboardManager;
@@ -45,7 +44,6 @@ private:
     WiFiManager _wifiManager;
     JellyfinClient _jellyfinClient;
     StorageManager _storageManager;
-    AlbumArtManager _albumArtManager;
     
     // ESP8266Audio Decoders and Handlers
     AudioOutputM5Speaker* _audioOut;

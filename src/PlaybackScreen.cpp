@@ -9,7 +9,6 @@ PlaybackScreen::PlaybackScreen(JellyfinClient* client, const String& trackId, co
       _albumId(""),
       _albumName(""),
       _artistName(""),
-      _localArtPath(""),
       _isLoadingMetadata(true),
       _hasError(false),
       _animCounter(0),
@@ -70,12 +69,6 @@ void PlaybackScreen::fetchTrackMetadata() {
                 _artistName = "Unknown Artist";
             }
             
-            // Download/resolve album art cache path (fallback to RAM)
-            extern App app;
-            if (_albumId.length() > 0) {
-                _localArtPath = app.getAlbumArtManager().getArtworkPath(_albumId);
-            }
-            
             _isLoadingMetadata = false;
         } else {
             _artistName = "Unknown Artist";
@@ -112,9 +105,48 @@ void PlaybackScreen::draw(M5Canvas& canvas) {
         canvas.setCursor(10, 60);
         canvas.print("Playback failed. Verify network link.");
     } else {
-        // Draw 96x96 Album Art on the left side
+        // Draw real-time waveform visualizer box
         extern App app;
-        app.getDisplayManager().drawAlbumArt(_localArtPath, 10, 20, 96, 96);
+        int visX = 10;
+        int visY = 20;
+        int visW = 96;
+        int visH = 96;
+        
+        canvas.drawRect(visX, visY, visW, visH, DisplayManager::COLOR_GRAY);
+        canvas.drawRect(visX + 2, visY + 2, visW - 4, visH - 4, DisplayManager::COLOR_CYAN);
+        
+        // Expose grid lines for a cyberpunk oscilloscope look
+        for (int gy = visY + 16; gy < visY + visH; gy += 16) {
+            canvas.drawFastHLine(visX + 3, gy, visW - 6, canvas.color565(30, 60, 60)); // Dark cyan grid line
+        }
+        for (int gx = visX + 16; gx < visX + visW; gx += 16) {
+            canvas.drawFastVLine(gx, visY + 3, visH - 6, canvas.color565(30, 60, 60)); // Dark cyan grid line
+        }
+        
+        const int16_t* audioBuffer = app.getAudioBuffer();
+        int prevX = 0, prevY = 0;
+        
+        for (int i = 0; i < 90; i++) {
+            int px = visX + 3 + i;
+            int py = visY + 48; // Center line (y = 68)
+            
+            if (audioBuffer && app.isAudioPlaying() && !app.isAudioPaused()) {
+                // Map the 90 visual points across 1024 audio stereo frames (left channel is even)
+                int sampleIdx = (i * 1024 / 90) * 2;
+                if (sampleIdx < 2048) {
+                    int16_t sample = audioBuffer[sampleIdx];
+                    // Scale the 16-bit range (-32768 to 32767) to a max amplitude of 40 pixels
+                    int yOffset = (sample * 40) / 32768;
+                    py = (visY + 48) - yOffset;
+                }
+            }
+            
+            if (i > 0) {
+                canvas.drawLine(prevX, prevY, px, py, DisplayManager::COLOR_CYAN);
+            }
+            prevX = px;
+            prevY = py;
+        }
         
         // Draw metadata details on the right side
         int textX = 115;

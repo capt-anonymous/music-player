@@ -24,7 +24,6 @@ public:
     // Reusable styling components
     void drawHeader(const char* title);
     void drawFooter(const char* status);
-    void drawAlbumArt(const String& localPath, int x, int y, int w = 96, int h = 96);
 
 private:
     M5Canvas _canvas;

@@ -20,8 +20,6 @@ private:
     String _albumName;
     String _artistName;
     
-    String _localArtPath;
-    
     bool _isLoadingMetadata;
     bool _hasError;
     uint32_t _animCounter;
